@@ -1,0 +1,1193 @@
+---
+title: "Spatio-Temporal Analysis of Dengue Cases in Brazil"
+output:
+  html_document: default
+  pdf_document: default
+bibliography: 02364269.bib  
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.pos = "!h")
+```
+
+# Abstract
+
+Dengue fever, a mosquito-borne viral infection, poses a significant
+public health challenge in many tropical and subtropical regions,
+including Brazil. This study investigates the spatio-temporal dynamics
+of dengue incidence in Brazil between 2015 and 2019, examining the
+variation across 557 microregions and months, and assessing the
+association with climatic covariates such as temperature, Palmer Drought
+Severity Index (PDSI), and piped water availability. The research aims
+to enhance our understanding of factors influencing dengue spread in
+Brazil and inform targeted intervention strategies.
+
+The analysis reveals a positive association between minimum temperature
+and dengue incidence, with a relative risk (RR) of 1.14 (95% CI 1.13 -
+1.16) for a 1-degree increase in temperature, mixed associations for
+PDSI, and no association with piped water availability. Furthermore, the
+study uncovers temporal patterns and spatial clustering of dengue
+incidence across all models, identifying the Goiânia microregion as
+particularly susceptible to a strong spatial effect (RR 31.03 [95% CI
+22.51 - 42.79]). Spatio-temporal modelling estimates demonstrate
+shifting dengue risk patterns between 2017 and 2019. In summary, the
+study emphasizes the coexistence of a Brazil-wide spatial and temporal
+component alongside a distinct region-dependent temporal component,
+indicating a complex spatio-temporal dynamic to dengue incidence.
+
+# Introduction
+
+Dengue fever, an acute infectious disease caused by the dengue virus, is
+transmitted to humans through the bite of infected Aedes mosquitoes.
+Brazil has witnessed a substantial increase in dengue incidence,
+alongside other mosquito-borne diseases like Zika and Chikungunya, in
+recent years. In 2022, Brazil experienced an unprecedented surge in
+dengue-related fatalities, potentially marking a historic peak
+[@piovezanBrazilBreaksRecord2023]. Factors such as climate,
+urbanization, and seasonality influence the spatio-temporal dynamics of
+these diseases. As climate change potentially impacts disease dynamics,
+deciphering the relationship between climatic variables and dengue
+incidence is crucial for public health planning and disease prevention
+initiatives.
+
+This study aims to investigate the spatio-temporal dynamics of dengue
+incidence in Brazil between 2015 and 2020, focusing on the variation in
+dengue incidence across 557 microregions and months, and the association
+with climatic covariates such as temperature, Palmer Drought Severity
+Index (PDSI), and piped water availability. In addition, the analysis
+aims to examine the potentially microregion-specific temporal dynamics
+of dengue incidence. The findings of this research will contribute to a
+better understanding of the factors influencing the spread of dengue in
+Brazil and provide valuable insights for targeted intervention
+strategies to mitigate the impact of this debilitating disease.
+
+# Methods
+
+Microregions are defined by the Brazilian Institute of Geography and
+Statistics. [@IBGECenso2010] Monthly dengue incidence data have been
+obtained from the Ministry of Health Information Department
+[@DATASUSMinisterioSaude]. Climatic covariate information (referred to henceforth as $\mathbf{C}$), including
+minimum temperature and Palmer's Drought Severity Index (PDSI), are
+available in monthly resolution by microregion and have been sourced
+from the Climatic Research Unit (CRU) [@ClimaticResearchUnit].
+Percentage access to the piped water network is derived from the 2010
+Brazilian census [@IBGECenso2010]. A median split was performed on this
+variable, creating a new derived variable that differentiates areas with
+water availability above and below the median value. It should be noted
+that the PDSI for the Fernando de Noronha microregion is unavailable,
+resulting in its exclusion from subsequent analysis.
+
+The inclusion of PDSI and temperature as covariates is supported by
+previous studies demonstrating the influence of temperature and rainfall
+patterns on seasonal dengue transmission
+[@loweCombinedEffectsHydrometeorological2021]. Additionally, high human
+population density and inadequate water supply (requiring water storage)
+are considered major contributors to dengue epidemics
+[@gublerClimateVariabilityChange2001], supporting the inclusion of piped
+water availability.
+
+The analytical plan involves several stages. First, the geographic and
+temporal distribution of the covariates and raw incidence rates of
+dengue across Brazil (averaged across all time points) will be
+visualized. Second, a spatio-temporal analysis will be conducted of the
+relationship between dengue incidence across Brazil, geographic region,
+and time between the years of 2015 - 2019. This will be accomplished by
+fitting five consecutive Bayesian spatio-temporal models with inclusion
+of the three aforementioned covariates.
+
+The posterior distributions of the coefficients, spatial, and temporal
+components across each model will be inspected and the expected values
+visualised in the appropriate domain. The expected value of the $\phi$
+hyperparameter will be inspected and compared across models to provide
+an estimate of the degree of spatial clustering. Finally, the
+Watanabe-Akaike Information Criterion (WAIC) will be compared across the
+models to help identify the model with the best balance between
+complexity and fit. The results from the aforementioned analyses will be
+investigated and commented upon.
+
+## Model specifications
+
+The observed value (ie., observed number of dengue cases), in common
+with every subsequent model is the following:
+
+\[
+\begin{eqnarray}
+O_{it} &\sim & \text{Poisson}(\rho_{it} \times \frac{pop_{it}}{10^5})
+\end{eqnarray}
+\]
+
+The spatio-temporal models to be fitted are specified as follows:
+
+1.  A BYM2 spatial model and a linear time trend (t being the month from
+    the onset of study), referred to as *ST-LT*:
+
+\[
+\begin{eqnarray}
+\log \rho_{it} &= & b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \beta_tt
+\end{eqnarray}
+\]
+
+2.  A BYM2 spatial model, a linear time trend (t being the month from
+    the onset of study), and an unstructured time component, referred to
+    as *ST-LUT*:
+
+\[
+\begin{eqnarray}
+\log \rho_{it} &= & b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \beta_tt + \psi_t
+\end{eqnarray}
+\]
+
+3.  A BYM2 spatial model and a RW1 structured time trend, referred to as
+    *ST-ST*:
+
+\[
+\begin{eqnarray}
+\log \rho_{it} &= & b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t
+\end{eqnarray}
+\]
+
+4.  A BYM2 spatial model, a RW1 structured time trend, and an
+    unstructured time component, referred to as *ST-SUT*:
+
+\[
+\begin{eqnarray}
+\log \rho_{it} &= & b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t + \psi_t
+\end{eqnarray}
+\]
+
+5.  A BYM2 spatial model, a RW1 structured time trend, an unstructured
+    time component, and a Type I space-time interaction component,
+    referred to as *ST-SUT-INT*:
+
+\[
+\begin{eqnarray}
+\log\rho_{it} &= & b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t + \psi_t + \delta_{it}
+\end{eqnarray}
+\]
+
+Variables above are defined as:
+
+\[
+\begin{eqnarray}
+\boldsymbol{b} &= & \frac{1}{\sqrt{\tau_b}}(\sqrt{1-\phi}\boldsymbol{v}_{*} + \sqrt{\phi}\boldsymbol{u}_{*})\\
+\beta & \sim & N(0,\sigma^2_{\beta})\\
+\psi_t & \sim & N(0,\sigma^2_{\psi})\\
+\gamma_t & \sim & \hbox{RW(1)}\\
+\delta_{it} & \sim & N(0,\sigma^2_{\delta})
+\end{eqnarray}
+\]
+
+The spatial random effect is modelled assuming a BYM2 specification.
+BYM2 combines an intrinsic CAR (ICAR) prior and a standard normal prior
+to allow for structured local ($u$) and unstructured global ($v$)
+smoothing, respectively:
+
+\[
+\begin{eqnarray}
+v_{i} & \sim & N(0,\sigma^2_{v})\\
+u & \sim & ICAR(W,\sigma^2_{u})
+\end{eqnarray}
+\]
+
+The temporal random effect is modelled as a random walk of order 1 in
+order to allow for observations to be dependent on those immediately
+temporally preceding it.
+
+Hyperprior distributions are further specified for $\tau_b$, $\phi$, and
+$\sigma^2_{\gamma}$; these are the precision parameters controlling the
+marginal variance of the spatial random effect, the mixing parameter
+(ie., the proportion of the marginal variance explained by the spatial
+effect), and the conditional variance of the temporal random effect,
+respectively. These hyperpriors are defined as Penalised Complexity (PC)
+priors, as suggested in the literature. [@moragaChapterArealData]
+
+Analysis was performed in R (v4.2.1) and with the R-INLA software
+package (v22.12.16) [@rueRINLA2023].
+
+# Results
+
+```{r libraries, echo=FALSE}
+required_packages <- c("dplyr", "sf", "spdep", "tidyr", "INLA", "ggplot2", "viridis", "patchwork",
+                      "knitr", "kableExtra", "lubridate", "stringr", "ggforestplot", "gridExtra",
+                      "cowplot", "ggsflabel")
+
+for (pkg in required_packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    if (pkg == "ggforestplot") {
+      devtools::install_github("NightingaleHealth/ggforestplot")
+    } else if (pkg == "ggsflabel") {
+      devtools::install_github("yutannihilation/ggsflabel")
+    } else {
+      install.packages(pkg)
+    }
+  }
+}
+
+library(dplyr)
+library(sf)
+library(spdep)
+library(tidyr)
+library(INLA)
+library(ggplot2)
+library(viridis)
+library(patchwork)
+
+library(knitr)
+library(kableExtra)
+
+library(lubridate)
+library(stringr)
+
+#devtools::install_github("NightingaleHealth/ggforestplot")
+library(ggforestplot)
+
+#install.packages("gridExtra")
+library(gridExtra)
+
+#install.packages("cowplot")
+library(cowplot)
+
+devtools::install_github("yutannihilation/ggsflabel")
+library(ggsflabel)
+```
+
+```{r import, echo = FALSE}
+dengue_csv = read.csv("DATA_SCIENTIFIC_PROJECTS/DS2_DengueBrazil/data_2015_2019.csv", header=TRUE)
+```
+
+## I. Preliminary insights
+
+```{r exploration, echo = FALSE}
+# inc_table <- kable(dengue_csv %>%
+#         group_by(year) %>%
+#          summarise(dengue_cases = sum(dengue_cases)), col.names = c("Year", "Cases"), booktabs = T, caption = "Dengue cases by year") %>%
+#   kable_styling(bootstrap_options = "striped", latex_options="hold_position", full_width = F, position = "center")
+
+summary_inc <- dengue_csv %>%
+        group_by(year) %>%
+         summarise(dengue_cases = round(sum(dengue_cases)/100000), 4)
+colnames(summary_inc) <- c("Year", "Incidence / 100,000")
+
+inc_table <- tableGrob(summary_inc, rows=NULL)
+
+# Exploring whether years have distinct ID_time values. (answer: yes, they do.)
+# This suggests the time identifier ID_time represents 'months'
+# It follows that 2015 + ((ID_time-1) / 12) is a more granular measure of time passed for a region
+# dengue_csv %>%
+#   group_by(year) %>%
+#   summarize(min_time = min(ID_time), max_time = max(ID_time), unique_times = n_distinct(ID_time)) %>%
+#   mutate(is_contiguous = (max_time - min_time + 1) == unique_times) %>%
+#   print()
+```
+
+```{r preproc, echo = FALSE}
+brazil_shape <- st_read("DATA_SCIENTIFIC_PROJECTS/DS2_DengueBrazil/shape_brazil.shp", quiet = TRUE)
+brazil_shape <- brazil_shape %>% filter(code != 26019)
+
+brazil_nb <- poly2nb(brazil_shape, queen=TRUE)
+# summary(brazil_nb)
+
+nb2INLA("brazil.graph",brazil_nb)
+brazil_adj <- paste(getwd(),"/brazil.graph",sep="")
+
+# Preparing the data, joining in the shape file, and create an ID for time and space.
+# Creating an 'O' for observed cases and a 'E' for population / 10^5 (true expected counts not available in this dataset)
+dengue_csv <- dengue_csv %>% dplyr::rename(O = dengue_cases) %>%
+  mutate(E = population/10^5)
+
+# Joining the dataset to the shape file
+dengue_data_st <- left_join(brazil_shape, dengue_csv, by="code")
+```
+
+```{r plotting_shape, echo = FALSE, eval = FALSE, out.width="75%", fig.align = 'center'}
+# We can begin by displaying the shape file.
+ggplot() +
+      geom_sf(data = brazil_shape, color = "darkred", fill = "white") +
+      coord_sf() +    #axis limits and CRS
+      theme_bw() +    # dark-on-light theme
+      theme(axis.title = element_text(size = 14),
+            axis.text = element_text(size = 12))
+```
+
+```{r explor_covars, echo = FALSE, eval = FALSE}
+
+hist(dengue_data_st$tmin, xlab="Minimum temperature", freq=FALSE)
+hist(dengue_data_st$pdsi, xlab="PDSI", freq=FALSE)
+hist(dengue_data_st$water_network, xlab="Water availability", freq=FALSE)
+
+# Deriving a new 'adq_water_avail' variable based on median value.
+med_water_avail <- median(dengue_data_st$water_network)
+dengue_data_st$adq_water_avail <- ifelse(dengue_data_st$water_network > med_water_avail, 1, 0)
+```
+
+```{r vis_incidence_space, fig.height=4, out.height='25%', echo = FALSE, fig.align='center'}
+dengue_csv_agg <- dengue_csv %>% group_by(code) %>% 
+              summarize(observed = sum(O), 
+                        expected = sum(E),
+                        mean_mintemp = mean(tmin),
+                        mean_pdsi = mean(pdsi),
+                        mean_water_network = mean(water_network),
+                        population = sum(population),
+                        ID_space = mean(ID_space)) %>% # Weird code
+              dplyr::rename(obs_code = observed, E = expected) 
+
+map_agg = left_join(brazil_shape, dengue_csv_agg, by = c("code" = "code"))
+
+inc <- ggplot() + geom_sf(data = map_agg, col = NA) + aes(fill = (obs_code/population) * 100000) +
+  theme_bw() + scale_fill_viridis_c() + 
+  guides(fill=guide_colorbar(title="Incidence"),
+         shape = guide_legend(override.aes = list(size = 0.5)),
+         color = guide_legend(override.aes = list(size = 0.5))) +
+  theme(legend.title = element_text(size = 10),
+         legend.text = element_text(size = 8),
+        plot.title = element_text(size = 14))   +
+  ggtitle("Incidence per 100,000")
+
+temp <- ggplot() + geom_sf(data = map_agg, col = NA) + aes(fill = mean_mintemp) +
+  theme_bw() + scale_fill_gradient(low = "#FFF5F0", high = "#67000D") + 
+  guides(fill=guide_colorbar(title=""),
+         shape = guide_legend(override.aes = list(size = 0.5)),
+         color = guide_legend(override.aes = list(size = 0.5))) +
+  theme(legend.title = element_text(size = 6),
+         legend.text = element_text(size = 6),
+        plot.title = element_text(size = 12))   +
+  ggtitle("Minimum temperature (°C)")
+
+pdsi <- ggplot() + geom_sf(data = map_agg, col = NA) + aes(fill = mean_pdsi) +
+  theme_bw() + scale_fill_gradient(low = "#8C510A", high = "#08306B") + 
+  guides(fill=guide_colorbar(title=""),
+         shape = guide_legend(override.aes = list(size = 0.5)),
+         color = guide_legend(override.aes = list(size = 0.5))) +
+  theme(legend.title = element_text(size = 6),
+         legend.text = element_text(size = 6),
+        plot.title = element_text(size = 12))   +
+  ggtitle("PDSI")
+
+water_avail <- ggplot() + geom_sf(data = map_agg, col = NA) + aes(fill = mean_water_network) +
+  theme_bw() + scale_fill_gradient(low = "#F7FBFF", high = "#08306B") + 
+  guides(fill=guide_colorbar(title=""),
+         shape = guide_legend(override.aes = list(size = 0.5)),
+         color = guide_legend(override.aes = list(size = 0.5))) +
+  theme(legend.title = element_text(size = 6),
+         legend.text = element_text(size = 6),
+        plot.title = element_text(size = 12))   +
+  ggtitle("Water availability (%)")
+
+#plot_grid(inc, temp, pdsi, water_avail)
+```
+
+The data available allows us to observe the number of dengue cases in
+Brazil per year. We are also able to visualise the geographic
+distribution of the raw incidence of dengue and its incidence by region
+across time. Similarly, we may visualise the covariates across time
+(sans water availability, as this variable is constant through time).
+Regional and temporal distributions of the covariates are available in
+the Supplement.
+
+```{r vis_incidence_time, out.height="30%", fig.width=12, fig.align='center', echo = FALSE}
+dengue_csv_agg_time <- dengue_csv %>% group_by(year, month, region_name) %>% 
+              summarize(observed = sum(O), 
+                        expected = sum(E),
+                        population = sum(population),
+                        mean_mintemp = mean(tmin),
+                        mean_pdsi = mean(pdsi),
+                        mean_water_network = mean(water_network)) %>% 
+              dplyr::rename(obs_code = observed, E = expected) %>%
+    unite("year_month", year, month, sep = "-", remove = FALSE) %>%
+    mutate(date = ymd(year_month, truncated = 1)) %>%
+    select(-year_month)
+
+inc_time <- ggplot(dengue_csv_agg_time, aes(x = date, y = (obs_code / population) * 100000, group = region_name, color=region_name)) +
+  geom_line() +
+  theme_bw() +  scale_color_viridis_d(guide = guide_legend(title = "Region")) +
+  labs(x = "Time", y = "Dengue Incidence per 100,000") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        plot.title = element_text(size = 14)) +
+  ggtitle("Incidence per 100,000 (top: absolute, bottom: relative)")
+
+dengue_csv_agg_time <- dengue_csv_agg_time %>%
+  group_by(date) %>%
+  mutate(total_incidence = sum(obs_code / population) * 100000,
+         prop_incidence = (obs_code / population) * 100000 / total_incidence)
+
+inc_time_relat <- ggplot(dengue_csv_agg_time, aes(x = date, y = prop_incidence, group = region_name, color=region_name)) +
+  geom_line() +
+  theme_bw() +
+  scale_color_viridis_d(guide = guide_legend(title = "Region")) +
+  labs(x = "Time", y = "Relative Dengue Incidence per 100,000") +
+  theme(axis.title.x = element_text(size = 8),
+        axis.title.y = element_blank(),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8))
+
+legend_tim <- cowplot::get_legend(inc_time)
+legend_reg <- cowplot::get_legend(inc)
+
+inc_time <- inc_time + theme(legend.position = "none")
+inc_time_relat <- inc_time_relat + theme(legend.position = "none")
+inc_ll <- inc + theme(legend.position = "none")
+
+# Combine the existing inc_time and inc_time_relat plots vertically
+combined_plot <- plot_grid(align_plots(inc_time, inc_time_relat)[[1]], inc_time_relat, nrow = 2, align = "v", rel_heights = c(2, 1))
+
+# Stack the legends vertically
+stacked_legends <- plot_grid(legend_reg, legend_tim, nrow = 2, align = "v")
+
+# Arrange the new_plot, combined_plot, and stacked_legends horizontally
+final_plot <- plot_grid(inc_ll, combined_plot, stacked_legends, ncol = 3, align = "h", rel_widths = c(3, 2, 1))
+
+print(final_plot)
+```
+
+```{r def_formulas, echo = FALSE}
+# Running models
+
+# Spatial-only (not implemented in this project)
+
+# formula_s <- obs_code ~ tmin + adq_water_avail + pdsi + f(ID_space, model="bym2", graph=brazil_adj, hyper = list(
+#                             prec = list(
+#                               prior = "pc.prec",
+#                               param = c(0.5 / 0.31, 0.01)),
+#                             phi = list(
+#                               prior = "pc",
+#                               param = c(0.5, 2 / 3))))
+
+# model_s <- inla(formula=formula_s, family="poisson",
+#                    data=dengue_csv_agg, offset = log(E), # E=E,
+#                    control.compute=list(waic=TRUE))
+
+
+# Implement simple linear spatio-temporal model (Model 1)
+
+formula_st_sl <- O ~ ID_time + tmin + adq_water_avail + pdsi + 
+                  # Spatially structured and unstructured random effect
+                   f(ID_space, model="bym2", graph=brazil_adj, hyper = list(
+                            prec = list(
+                              prior = "pc.prec",
+                              param = c(0.5 / 0.31, 0.01)),
+                            phi = list(
+                              prior = "pc",
+                              param = c(0.5, 2 / 3))))
+
+# Implement ^ + temporally unstructured RE (Model 2)
+
+dengue_data_st$ID_time2 <- dengue_data_st$ID_time
+
+formula_st_sl_utime <- O ~ ID_time + tmin + adq_water_avail + pdsi + 
+                  # Spatially structured and unstructured random effect
+                  f(ID_space,model="bym2", graph=brazil_adj, hyper = list(
+                            prec = list(
+                              prior = "pc.prec",
+                              param = c(0.5 / 0.31, 0.01)),
+                            phi = list(
+                              prior = "pc",
+                              param = c(0.5, 2 / 3)))) + 
+                  # Temporally unstructured random effect
+                  f(ID_time2, model="iid", hyper=list(prec = list(
+                            prior = "pc.prec",
+                            param = c(0.5 / 0.31, 0.01))))
+
+# Implement simple additive space-time structure  (Model 3)
+
+formula_st_stime <- O ~ tmin + adq_water_avail + pdsi + 
+                  # Spatially structured and unstructured random effect
+                  f(ID_space, model="bym2", graph=brazil_adj, hyper = list(
+                            prec = list(
+                              prior = "pc.prec",
+                              param = c(0.5 / 0.31, 0.01)),
+                            phi = list(
+                              prior = "pc",
+                              param = c(0.5, 2 / 3)))) +
+                  # Temporally structured random effect
+                  f(ID_time, model="rw1", hyper = list(
+                            prec = list(
+                              prior = "pc.prec",
+                              param = c(0.5 / 0.31, 0.01))))
+
+# Implement ^ + temporally unstructured RE (Model 4)
+
+formula_st_sutime <- O ~ tmin + adq_water_avail + pdsi + 
+                  # Spatially structured and unstructured random effect
+                  f(ID_space, model="bym2", graph=brazil_adj, hyper = list(
+                            prec = list(
+                              prior = "pc.prec",
+                              param = c(0.5 / 0.31, 0.01)),
+                            phi = list(
+                              prior = "pc",
+                              param = c(0.5, 2 / 3)))) +
+                  # Temporally structured random effect
+                  f(ID_time, model="rw1", hyper = list(
+                            prec = list(
+                              prior = "pc.prec",
+                              param = c(0.5 / 0.31, 0.01)))) +
+                  # Temporally unstructured random effect
+                  f(ID_time2, model="iid", hyper=list(prec = list( 
+                            prior = "pc.prec",
+                            param = c(0.5 / 0.31, 0.01))))
+
+# ST-Int model (Model 5 + interaction)
+
+dengue_data_st$idx <- seq(1,nrow(dengue_data_st))
+
+formula_st_sutime_int <- O ~ tmin + adq_water_avail + pdsi + 
+                  # Spatially structured and unstructured random effect
+                  f(ID_space, model="bym2", graph=brazil_adj, hyper = list(
+                            prec = list(
+                              prior = "pc.prec",
+                              param = c(0.5 / 0.31, 0.01)),
+                            phi = list(
+                              prior = "pc",
+                              param = c(0.5, 2 / 3)))) +
+                  # Temporally structured random effect
+                  f(ID_time, model="rw1", hyper = list(
+                            prec = list(
+                              prior = "pc.prec",
+                              param = c(0.5 / 0.31, 0.01)))) +
+                  # Temporally unstructured random effect
+                  f(ID_time2, model="iid", hyper=list(prec = list( 
+                            prior = "pc.prec",
+                            param = c(0.5 / 0.31, 0.01)))) +
+                  # Space-time interaction effect
+                  f(idx, model="iid", hyper=list(prec = list(
+                            prior = "pc.prec",
+                            param = c(0.5 / 0.31, 0.01))))
+```
+
+```{r fitting, echo = FALSE}
+# Fitting models
+
+#load("models.RData") # For fast loading
+
+model_names <- c('model_st_sl', 'model_st_sl_utime', 'model_st_stime', 'model_st_sutime', 'model_st_sutime_int')
+
+# Simple linear spatio-temporal model
+model_st_sl <- inla(formula=formula_st_sl, family="poisson",
+                   data=dengue_data_st, offset = log(E), # E=E,
+                   control.compute=list(waic=TRUE))#, control.inla=list(control.vb=list(emergency=30)))
+
+# Log-linear temporal model with unstructured temporal random effects
+model_st_sl_utime <- inla(formula=formula_st_sl_utime, family="poisson",
+                   data=dengue_data_st, offset = log(E), # E=E,
+                   control.compute=list(waic=TRUE))
+
+# Simple additive space-time structure (without unstructured temporal term)
+model_st_stime <- inla(formula=formula_st_stime, family="poisson",
+                   data=dengue_data_st, offset = log(E), # E=E,
+                   control.compute=list(waic=TRUE))
+
+# Simple additive space-time structure (with unstructured temporal term)
+model_st_sutime <- inla(formula=formula_st_sutime, family="poisson",
+                   data=dengue_data_st, offset = log(E), # E=E,
+                   control.compute=list(waic=TRUE))
+
+# Space-time model with exchangeable interactions
+model_st_sutime_int <- inla(formula=formula_st_sutime_int, family="poisson",
+                   data=dengue_data_st, offset = log(E), # E=E,
+                   control.compute=list(waic=TRUE))
+
+#save(model_st_sl, model_st_sl_utime, model_st_stime, model_st_sutime, model_st_sutime_int, file = 'models.RData') # For saving
+
+```
+
+## II. Result visualisation
+
+### Fixed effects:
+
+After fitting the models, we can derive the posterior means and 95%
+credible intervals (CI) for the $\beta$ coefficients across each model.
+The outcomes are generally consistent across models, with the most
+significant discrepancy being the differing signs of the PDSI
+coefficient. Considering the *ST-SUT-INT* model, the RR associated with
+a 1 degree increase in temperature is
+`r round(exp(model_st_sutime_int$summary.fixed['tmin', '0.5quant']), 2)`
+(CI 95%
+`r round(exp(model_st_sutime_int$summary.fixed['tmin', '0.025quant']), 2)` -
+`r round(exp(model_st_sutime_int$summary.fixed['tmin', '0.975quant']), 2)`)
+and with a 1 unit increase in PDSI the RR is
+`r round(exp(model_st_sutime_int$summary.fixed['pdsi', '0.5quant']), 2)`
+(CI 95%
+`r round(exp(model_st_sutime_int$summary.fixed['pdsi', '0.025quant']), 2)` -
+`r round(exp(model_st_sutime_int$summary.fixed['pdsi', '0.975quant']), 2)`).
+This model shows larger credible intervals for the latter two variables
+compared to other models. The 95% CI of the coefficient for water
+availability crosses an RR of 1 for all models. Lastly, when comparing
+the two models that include a linear temporal term, it is evident that
+the model with an unstructured temporal component demonstrates a
+substantially broader credible interval for the coefficient representing
+the months since the study began. A forest plot is available in the
+Supplement.
+
+```{r post_ggplot, echo=FALSE}
+model_names <- c('model_st_sl', 'model_st_sl_utime', 'model_st_stime', 'model_st_sutime', 'model_st_sutime_int')
+
+plot_posteriors_ggplot <- function(var_name, label) {
+  plots <- list()
+  
+  plot_titles <- c('ST-LT', 'ST-LUT', 'ST-ST', 'ST-SUT', 'ST-SUT-INT')
+  n_cols <- length(model_names)
+  
+  for (i in seq_along(model_names)) {
+    model <- get(model_names[i])
+    
+    density_data <- data.frame(x = model$marginals.fixed[[var_name]][,'x'],
+                               y = model$marginals.fixed[[var_name]][,'y'])
+
+    density_data$model_name <- model_names[i]
+    density_data$lower_bound <- model$summary.fixed[var_name, '0.025quant']
+    density_data$median <- model$summary.fixed[var_name, '0.5quant']
+    density_data$upper_bound <- model$summary.fixed[var_name, '0.975quant']
+
+    p <- (ggplot(density_data, aes(x = x, y = y, color="red")) +
+      geom_line() +
+      geom_vline(aes(xintercept = lower_bound), linetype = "dashed", color = "grey") +
+      geom_vline(aes(xintercept = upper_bound), linetype = "dashed", color = "grey") +
+      labs(x = "", y = ifelse(i==1, "density", "")) +
+      theme_bw() +
+      theme(legend.position = "none", plot.title.position = "plot",
+            axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size=12),
+            plot.title = element_text(size=16, face="bold", margin=margin(0,0,20,0)),
+            plot.subtitle=element_text(size=14)) + ggtitle(ifelse(i==1, label, ""),
+                                                           subtitle=plot_titles[i]) +
+      scale_x_continuous(breaks = c(density_data$lower_bound, density_data$median, density_data$upper_bound),
+                         labels=round(c(density_data$lower_bound, density_data$median, density_data$upper_bound), 3)) +
+      geom_vline(aes(xintercept = median), color = "black", linetype = "dashed"))
+     # geom_text(x = -Inf, y = -Inf, hjust = -0.15, vjust=-7, label=plot_titles[i], color="black"))
+    plots[[i]] <- p
+  }
+  
+  return(plots)
+}
+```
+
+### Random effects:
+
+For the simple linear model, visualisation of the posterior means of the
+unstructured temporal component was performed to assess for temporal
+structure which may not have been captured in the linear term. Across
+all models incorporating a structured temporal component, $\gamma_i$,
+visualisation of its posterior mean (RR) was performed for assessment.
+These plots may be found in the Supplement.
+
+We may also obtain regional plots of the posterior means of the spatial
+RR, $b_i$, across each model. In the interest of space, we will only
+compare the model with structured and unstructured spatio-temporal
+elements to the model with an additional interaction term. Notably, the
+highest spatial RR from the interaction model was Goiânia with an RR of
+31.03 (95% CI 22.51 - 42.79). In addition, the spatial fraction was
+obtained from the mean of the posterior distribution for the $\phi$
+hyperparameter. Tables of the spatial fraction and further visual
+representations of the spatial RR across all models can be found in the
+Supplement.
+
+```{r extr_post_spatRR, echo = FALSE}
+# Residual RRs (b_i) - spatial relative risks
+rr_spatial_model1 <- rr_spatial_model2 <- rr_spatial_model3 <- rr_spatial_model4 <- rr_spatial_model5 <- c()
+
+# Expected values of posterior marginals of b_i per area, transformed
+for(i in 1:557){
+  rr_spatial_model1[i] = inla.emarginal(function(x) exp(x), 
+        model_st_sl$marginals.random$ID_space[[i]])
+  rr_spatial_model2[i] = inla.emarginal(function(x) exp(x),
+        model_st_sl_utime$marginals.random$ID_space[[i]])
+  rr_spatial_model3[i] = inla.emarginal(function(x) exp(x),
+        model_st_stime$marginals.random$ID_space[[i]])
+  rr_spatial_model4[i] = inla.emarginal(function(x) exp(x),
+        model_st_sutime$marginals.random$ID_space[[i]])
+  rr_spatial_model5[i] = inla.emarginal(function(x) exp(x),
+        model_st_sutime_int$marginals.random$ID_space[[i]])
+}
+```
+
+```{r vis_post_spatRR, out.height="20%", fig.width=12, fig.align="center", echo = FALSE}
+rr_spatial_models_df <- data.frame(resRR_1=rr_spatial_model1, 
+                                   resRR_2=rr_spatial_model2, 
+                                   resRR_3=rr_spatial_model3, 
+                                   resRR_4=rr_spatial_model4, 
+                                   resRR_5=rr_spatial_model5, 
+                       code=dengue_csv_agg$code)
+
+map_spatialRR_models <- left_join(dengue_data_st, rr_spatial_models_df, by = c("code" = "code"), keep = FALSE)
+
+spatialRR_model1_plot <- ggplot() + geom_sf(data = map_spatialRR_models, col = NA) + aes(fill = resRR_1) + 
+  theme_bw() + scale_fill_gradientn( colors = terrain.colors(10)) + #+ scale_fill_brewer(palette = "PuOr") +
+  guides(fill=guide_legend(title="RR", override.aes = list(size = 0.5))) +  ggtitle("ST-LT") +
+  theme(plot.title = element_text(size=14),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        axis.text.x = element_blank(), 
+        axis.text.y = element_blank())
+
+spatialRR_model2_plot <- ggplot() + geom_sf(data = map_spatialRR_models, col = NA) + aes(fill = resRR_2) + 
+  theme_bw() + scale_fill_gradientn( colors = terrain.colors(10)) + #+ scale_fill_brewer(palette = "PuOr") + 
+  guides(fill=guide_legend(title="RR", override.aes = list(size = 0.5))) +  ggtitle("ST-LUT") +
+  theme(plot.title = element_text(size=14),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        axis.text.x = element_blank(), 
+        axis.text.y = element_blank())
+
+spatialRR_model3_plot <- ggplot() + geom_sf(data = map_spatialRR_models, col = NA) + aes(fill = resRR_3) + 
+  theme_bw() + scale_fill_gradientn( colors = terrain.colors(10)) + #+ scale_fill_brewer(palette = "PuOr") + 
+  guides(fill=guide_legend(title="RR", override.aes = list(size = 0.5))) +  ggtitle("ST-ST") +
+  theme(plot.title = element_text(size=14),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        axis.text.x = element_blank(), 
+        axis.text.y = element_blank())
+
+spatialRR_model4_plot <- ggplot() + geom_sf(data = map_spatialRR_models, col = NA) + aes(fill = resRR_4) +
+  theme_bw() + scale_fill_gradientn( colors = terrain.colors(10)) + #+ scale_fill_brewer(palette = "PuOr") + 
+  guides(fill=guide_legend(title="RR", override.aes = list(size = 0.5))) +   ggtitle("ST-SUT") +
+  theme(plot.title = element_text(size=14),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        axis.text.x = element_blank(), 
+        axis.text.y = element_blank()) 
+
+spatialRR_model5_plot <- ggplot() + geom_sf(data = map_spatialRR_models, col = NA, aes(fill = resRR_5)) + 
+  theme_bw() + scale_fill_gradientn( colors = terrain.colors(10)) + #+ scale_fill_brewer(palette = "PuOr") +
+  guides(fill=guide_legend(title="RR", override.aes = list(size = 0.5))) +  ggtitle("ST-SUT-INT") +
+  geom_sf_label_repel(data = map_spatialRR_models %>% filter(ID_space == 548) %>% top_n(1, ID_time), aes(
+            x = mean(st_coordinates((map_spatialRR_models %>% filter(ID_space == 548) %>% top_n(1, ID_time))$geometry)[,1]),
+            y = mean(st_coordinates((map_spatialRR_models %>% filter(ID_space == 548) %>% top_n(1, ID_time))$geometry)[,2]), label = "Goiânia"), arrow = arrow(type="open", length = unit(0.02, "npc")), 
+        fontface = "bold", nudge_x = -12, nudge_y = -8, color="darkred", size=7) +
+  theme(plot.title = element_text(size=14),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+# Only display 4 and 5 for now (rest in Supplement)
+plot_grid(spatialRR_model4_plot, spatialRR_model5_plot, align = "h",  ncol = 2)
+
+```
+
+Furthermore, we can observe the posterior mean of the interaction
+effect, $\delta$, from the spatio-temporal interaction model. The
+results are averaged over the months of each year. Only the regional
+plots from the years 2017 and 2019 are displayed here for brevity's
+sake: (see Supplement)
+
+```{r plot_st_interaction, out.height="20%", fig.width=12, fig.align='center', echo = FALSE}
+dengue_data_st$int_effect <- model_st_sutime_int$summary.random$idx$mean
+
+dengue_data_st_mean <- dengue_data_st %>%
+  group_by(year, ID_space) %>%
+  summarize(mean_int_effect = mean(int_effect, na.rm = TRUE)) %>%
+  ungroup()
+
+st_int_plot <- function(y) {
+  return(ggplot() + 
+  geom_sf(data = dengue_data_st_mean %>% filter(year==y), aes(fill = mean_int_effect), col=NA) +
+  theme_bw() +   scale_fill_gradient2(low = "blue", mid = "cornsilk", high = "red", midpoint = 0) +
+            guides(fill=guide_legend(title="RR", override.aes = list(size = 0.5))) + 
+            theme(text = element_text(size=20), 
+                  axis.text.x = element_blank(), 
+                  axis.text.y = element_blank(),
+                  legend.title = element_text(size = 12),
+                  legend.text = element_text(size = 10),
+                  plot.title = element_text(size=14)) + ggtitle(y))
+}
+
+# Only display these two years (rest in Supplement)
+p1 <- st_int_plot(2017)
+p2 <- st_int_plot(2019)
+plot_grid(p1, p2, align = "h",  ncol = 2)
+
+```
+
+Finally, we compare model performance with the Watanabe--Akaike
+information criterion (WAIC). The model including the interaction term
+scored the lowest (195,728 vs. 21,613,936, the second lowest). (see
+Supplement)
+
+# Discussion and conclusion
+
+#### Fixed effects
+
+Our findings highlight the limitations of linear models in capturing
+temporal associations with dengue occurrence, as the unstructured
+temporal random effect reveals a distinct seasonal pattern.
+
+Consistent with previous research, our study confirms the correlation
+between increased minimum temperature and dengue incidence, supporting
+the notion that warmer conditions contribute to a rise in dengue cases
+[@bambrickClimateChangeCould2009].
+
+Interestingly, while prior research suggests a connection between
+increased moisture levels and dengue incidence, our study only found a
+positive association between higher PDSI and dengue incidence in the
+model without a random temporal component. This discrepancy could be
+attributed to the random effects' capture of the temporal components in
+drought indices, resulting in divergent effect estimates.
+
+Across all models, we observed that the percentage of water availability
+did not seem to have a notable association with dengue incidence. This
+is a surprising result, given that existing evidence indicates a link
+between increased water storage and dengue incidence
+[@schmidtPopulationDensityWater2011]. It is possible that this
+discrepancy arises from dengue incidence reflecting drought conditions
+and subsequent water storage rather than access to piped water per se.
+
+Lastly, it is noteworthy that the credible intervals for PDSI and
+temperature in the interaction model are generally wider compared to
+those in other models. This phenomenon is likely due to the interaction
+term capturing similar region and temporally-dependent metrics.
+
+#### Random effects
+
+The simple linear temporal model's unstructured component exposes a
+temporal pattern not captured by a basic linear trend. By incorporating
+a structured temporal component, modeled as a first-order random walk,
+we successfully account for the strong nationwide temporal aspect of
+dengue incidence in Brazil (e.g., season-related). Our study also
+highlights a notable decrease in dengue incidence across all regions
+during the 2017-2018 Zika outbreak period, aligning with existing
+literature [@zambranaSeroprevalenceRiskFactor2018].
+
+Our analysis across all models consistently reveals spatial clustering
+of dengue incidence, as evidenced by visual inspection of spatial
+relative risk (RR) graphs and the spatial mixing hyperparameter, $\phi$.
+The Goiânia microregion, in particular, was estimated to have a strong
+separable spatial effect. This reflects recent reports of this
+microregion experiencing the highest confirmed cases of dengue in the
+country in 2022 [@PortalGoiasGoias].
+
+Furthermore, spatio-temporal interaction estimates can be observed by
+visualizing its posterior probability, averaged by year, and examining
+the spatial clustering patterns. In 2017, a relatively higher dengue
+risk is evident in the Northern regions of Brazil compared to the rest
+of the country. However, by 2019, the risk shifts towards the
+Central-West region, while the Northern area experiences a relatively
+lower risk. This additional information carried by the interaction is
+further reflected in the regional and temporal plots of the spatial and
+temporal RRs by the interaction models' reduction in contribution to the
+respective separable components, driven by spatio-temporal discongruity.
+Finally, we can observe that the model containing the Type I
+spatio-temporal interaction performs better than the separable models by
+noting the significantly lower WAIC.
+
+#### Limitations
+
+Investigating dengue fever holds significant importance for both public
+health interventions and future research directions. By revealing the
+coexistence of nationwide and region-specific spatio-temporal components
+in Brazil's dengue incidence, this study highlights the complex
+interplay between environmental factors and disease dynamics. However,
+limitations such as the limited number of factors considered, a lack of
+peri-Brazilian data coverage for more accurate spatial modeling, and
+temporally granular water availability data call for further
+investigation. Additionally, the discrepancies from the literature
+concerning the water availability-dengue relationship
+[@schmidtPopulationDensityWater2011] emphasize the need for
+context-specific public health interventions and more advanced modeling
+techniques to capture complex relationships.
+
+The insights gained from this study can inform targeted vector control
+strategies and underscore the potential impact of climate change on
+dengue distribution. To build upon our understanding of disease
+transmission dynamics, future research should incorporate additional
+factors, investigate other vector-borne diseases, and employ non-linear
+or machine learning models, as recommended by
+[@loweSpatiotemporalModellingClimatesensitive2011] and
+[@guoDevelopingDengueForecast2017]. By deepening our knowledge of the
+factors influencing the spread of dengue and other vector-borne diseases
+in Brazil, we can better equip public health authorities to design and
+implement more effective interventions, ultimately mitigating the impact
+of these debilitating diseases on affected communities. \newpage
+
+# Supplement
+
+## Covariates and dengue incidence
+
+Covariates and dengue incidence plotted over time:
+
+```{r app_covars_temp, fig.height=8, fig.width=10, fig.align='centre', echo=FALSE}
+dengue_csv_agg_time <- dengue_csv %>% group_by(year, month) %>% 
+              summarize(total_incidence = (sum(O)/sum(population))*100000,
+                        mean_mintemp = mean(tmin),
+                        mean_pdsi = mean(pdsi),
+                        mean_water_network = mean(water_network)) %>% 
+    unite("year_month", year, month, sep = "-", remove = FALSE) %>%
+    mutate(date = ymd(year_month, truncated = 1)) %>%
+    select(-year_month)
+
+inc_time <- ggplot(dengue_csv_agg_time, aes(x = date, y = total_incidence)) +
+  geom_line() +
+  theme_bw() +  scale_color_viridis_d(guide = guide_legend(title=NULL)) +
+  labs(x = "Time", y = "Dengue Incidence per 100,000") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        plot.title = element_text(size = 12)) +
+  ggtitle("Incidence per 100,000")
+
+temp_time <- ggplot(dengue_csv_agg_time, aes(x = date, y = mean_mintemp)) +
+  geom_line(aes(color = mean_mintemp)) + guides(fill=guide_legend(title=NULL)) +
+  theme_bw() + scale_fill_gradient(low = "#FFF5F0", high = "#67000D") +
+  labs(x = "Time", y = "Minimum temperature (°C)", color=NULL)
+
+pdsi_time <- ggplot(dengue_csv_agg_time, aes(x = date, y = mean_pdsi)) +
+  geom_line(aes(color = mean_pdsi)) + guides(fill=guide_legend(title=NULL)) +
+  theme_bw() + scale_fill_gradient(low = "#8C510A", high = "#08306B") + 
+  labs(x = "Time", y = "PDSI", color=NULL)
+
+plot_grid(inc_time, temp_time, pdsi_time, nrow=3, align='v')
+```
+
+Covariates and dengue incidence plotted in space:
+
+```{r app_covars_spac, fig.align='centre', echo=FALSE}
+inc <- inc +   theme(legend.title = element_text(size = 10),
+         legend.text = element_text(size = 8),
+        plot.title = element_text(size = 12))
+temp <- temp +   theme(legend.title = element_text(size = 10),
+         legend.text = element_text(size = 8),
+        plot.title = element_text(size = 12))
+pdsi <- pdsi +   theme(legend.title = element_text(size = 10),
+         legend.text = element_text(size = 8),
+        plot.title = element_text(size = 12))
+water_avail <- water_avail +   theme(legend.title = element_text(size = 10),
+         legend.text = element_text(size = 8),
+        plot.title = element_text(size = 12))
+plot_grid(inc, temp, pdsi, water_avail, ncol=2, align='h')
+```
+
+## Fixed effects
+
+```{r, out.height="30%", fig.width=12, fig.align='center', echo=FALSE, eval=FALSE}
+# PDSI over time:
+#plot(y=dengue_data_st$pdsi,x=dengue_data_st$ID_time)
+ggplot(data=dengue_data_st %>% group_by(ID_time) %>% summarise(mpdsi = mean(pdsi))) + geom_line(aes(x=ID_time, y=mpdsi))
+```
+
+### Posterior distributions (log RR)
+
+```{r 1, echo = FALSE, fig.width=12, fig.height=8, fig.align='center'}
+tmin_plots <- plot_posteriors_ggplot('tmin', "Min. temperature")
+pdsi_plots <- plot_posteriors_ggplot('pdsi', "PDSI")
+wavail_plots <- plot_posteriors_ggplot('adq_water_avail', "Water availability")
+
+plot_grid(tmin_plots[[1]], tmin_plots[[2]], tmin_plots[[3]], tmin_plots[[4]], tmin_plots[[5]],
+          pdsi_plots[[1]], pdsi_plots[[2]], pdsi_plots[[3]], pdsi_plots[[4]], pdsi_plots[[5]],
+          wavail_plots[[1]], wavail_plots[[2]], wavail_plots[[3]], wavail_plots[[4]], wavail_plots[[5]], align = "v",  ncol = 5)
+```
+
+### Forest plots (RR)
+
+```{r extrvis_post_feRR, fig.height=5, fig.width=10, fig.align='center', echo = FALSE}
+extract_info <- function(model_summary) {
+  model_summary <- model_summary[-1,]
+  variables <- rownames(model_summary)
+  means <- model_summary[, "mean"] # Need means for this package (so CI's work properly)
+  lower <- model_summary[, "0.025quant"]
+  upper <- model_summary[, "0.975quant"]
+  
+  return(data.frame(variable = variables, mean = means, lower = lower, upper = upper))
+}
+
+
+model_st_sl_data <- extract_info(model_st_sl$summary.fixed)
+model_st_sl_data$model <- "ST-LT"
+
+model_st_sl_utime_data <- extract_info(model_st_sl_utime$summary.fixed)
+model_st_sl_utime_data$model <- "ST-LUT"
+
+model_st_stime_data <- extract_info(model_st_stime$summary.fixed)
+model_st_stime_data$model <- "ST-ST"
+
+model_st_sutime_data <- extract_info(model_st_sutime$summary.fixed)
+model_st_sutime_data$model <- "ST-SUT"
+
+model_st_sutime_int_data <- extract_info(model_st_sutime_int$summary.fixed)
+model_st_sutime_int_data$model <- "ST-SUT-INT"
+
+all_data <- rbind(model_st_sl_data, model_st_sl_utime_data, model_st_stime_data, model_st_sutime_data, model_st_sutime_int_data)
+
+all_data$model <- factor(all_data$model, levels=c('ST-SUT-INT', 'ST-SUT', 'ST-ST', 'ST-LUT', 'ST-LT'))
+all_data <- all_data %>% mutate(variable = case_when(
+  variable == 'ID_time' ~ 'Months from start',
+  variable == 'tmin' ~ 'Minimum temperature',
+  variable == 'pdsi' ~ 'PDSI',
+  variable == 'adq_water_avail' ~ 'Water availability'))
+
+ggforestplot::forestplot(df = all_data, name = variable, colour = model, size = 2,
+                  estimate = mean, se = (upper - lower),  conf.int = 0.95,
+                  logodds = TRUE,
+                  legend.title = "Model",
+                  xlab = "Relative risk of dengue incidence (95% CI)\nper 1 unit increment in covariate") +
+  theme(axis.title.x = element_text(size=6))
+
+```
+
+## Random effects
+
+### Temporal random effects
+
+Unstructured temporal term in simple linear model:
+
+```{r sl_US, fig.height=2, fig.align='left', echo = FALSE}
+marginals <- model_st_sl_utime$marginals.random$ID_time2
+
+expected_values <- sapply(marginals, function(m) {
+  inla.emarginal(function(x) exp(x), m)
+})
+
+df <- data.frame(
+  Time = 2015+(seq(1, length(expected_values), 1)/12),
+  RR = expected_values
+)
+
+ggplot(df, aes(x = Time, y = RR)) +
+  geom_line() +
+  labs(x = "Time (years)", y = "Relative Risk (RR)") +
+  theme_minimal()
+```
+
+Plots of temporal random effects across each model (RR):
+
+```{r extr_post_tempRR, fig.align='left', echo = FALSE}
+rr_temporal <- array(NA, dim = c(3, 60, 3), 
+            dimnames = list(NULL, NULL, c("eRR", "loRR", "hiRR")))
+model_idx <- 1
+
+for(m in c('model_st_stime', 'model_st_sutime', 'model_st_sutime_int')) {
+  current_model <- get(m)
+  for(i in 1:60) {
+    rr_temporal[model_idx, i, 'eRR'] <- inla.emarginal(function(x) exp(x), current_model$marginals.random$ID_time[[i]])
+    rr_temporal[model_idx, i, 'loRR'] <- inla.qmarginal(0.025,inla.tmarginal(function(x) exp(x), current_model$marginals.random$ID_time[[i]]))
+    rr_temporal[model_idx, i, 'hiRR'] <- inla.qmarginal(0.975, inla.tmarginal(function(x) exp(x), current_model$marginals.random$ID_time[[i]]))
+  }
+  model_idx <- model_idx + 1
+}
+```
+
+```{r vis_post_tempRR, fig.height=2, fig.align='left', echo = FALSE}
+# Create a new data frame with model information
+data_all_models <- data.frame()
+for (model_idx in 1:3) {
+  data_temp <- data.frame(
+    year = seq(2015, by = 5 / 60, length.out = 60),
+    eRR = rr_temporal[model_idx, , "eRR"],
+    loRR = rr_temporal[model_idx, , "loRR"],
+    hiRR = rr_temporal[model_idx, , "hiRR"],
+    model = factor(model_idx, levels = 1:3, labels = c("ST-ST", "ST-SUT", "ST-SUT-INT"))
+  )
+  data_all_models <- rbind(data_all_models, data_temp)
+}
+
+ggplot(data_all_models, aes(year, eRR, color = model)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = loRR, ymax = hiRR, fill = model), alpha = 0.1, colour = NA) +
+  geom_hline(yintercept = 1, color = "blue", linetype = "dotted") +
+  labs(x = "Time (years)", y = "Relative Risk (RR)") +
+  scale_color_manual(values = c("red", "green", "blue")) +
+  scale_fill_manual(values = c("red", "green", "blue")) +
+  theme(legend.title = element_blank()) +
+  labs(linetype = "Model", color = "Model", fill = "Model")
+```
+
+### Spatial random effects
+
+Spatial RR across all models:
+
+```{r app_spat_rr, echo = FALSE, fig.align='centre'}
+spatialRR_model1_plot <- spatialRR_model1_plot + theme(plot.title = element_text(size=10),
+        legend.title = element_text(size = 6),
+        legend.text = element_text(size = 6))
+spatialRR_model2_plot <- spatialRR_model1_plot + theme(plot.title = element_text(size=10),
+        legend.title = element_text(size = 6),
+        legend.text = element_text(size = 6))
+spatialRR_model3_plot <- spatialRR_model1_plot + theme(plot.title = element_text(size=10),
+        legend.title = element_text(size = 6),
+        legend.text = element_text(size = 6))
+spatialRR_model4_plot <- spatialRR_model1_plot + theme(plot.title = element_text(size=10),
+        legend.title = element_text(size = 6),
+        legend.text = element_text(size = 6))
+spatialRR_model5_plot <- ggplot() + geom_sf(data = map_spatialRR_models, col = NA, aes(fill = resRR_5)) + 
+  theme_bw() + scale_fill_gradientn( colors = terrain.colors(10)) + #+ scale_fill_brewer(palette = "PuOr") + 
+  guides(fill=guide_legend(title="RR", override.aes = list(size = 0.5))) +  ggtitle("ST-SUT-INT") +
+    theme(plot.title = element_text(size=10),
+        legend.title = element_text(size = 6),
+        legend.text = element_text(size = 6),
+        axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+plot_grid(spatialRR_model1_plot, spatialRR_model2_plot, spatialRR_model3_plot,
+          spatialRR_model4_plot, spatialRR_model5_plot,
+          align = "hv",  ncol = 3)
+```
+
+### Interaction effects
+
+Spatio-temporal interaction effect RR (averaged per year):
+
+```{r app_int_rr, echo = FALSE, fig.align='centre'}
+st_int_plot <- function(y) {
+  return(ggplot() + 
+  geom_sf(data = dengue_data_st_mean %>% filter(year==y), aes(fill = mean_int_effect), col=NA) +
+  theme_bw() +   scale_fill_gradient2(low = "blue", mid = "cornsilk", high = "red", midpoint = 0) +
+            guides(fill=guide_legend(title="RR", override.aes = list(size = 0.5))) + 
+            theme(text = element_text(size=20), 
+                  axis.text.x = element_blank(), 
+                  axis.text.y = element_blank(),
+                  legend.title = element_text(size = 6),
+                  legend.text = element_text(size = 6),
+                  plot.title = element_text(size=10)) + ggtitle(y))
+}
+
+p1 <- st_int_plot(2015)
+p2 <- st_int_plot(2016)
+p3 <- st_int_plot(2017)
+p4 <- st_int_plot(2018)
+p5 <- st_int_plot(2019)
+
+  
+plot_grid(p1, p2, p3, p4, p5, align = "hv",  ncol = 3)
+```
+
+### Mixing parameter ($\phi$)
+
+Table of spatial mixing parameter (per BYM2) across each model:
+
+```{r spatial_fraction, echo = FALSE, fig.align='left'}
+phi_df = data.frame(model = c("ST-LT", "ST-LUT", "ST-ST", "ST-SUT", "ST-SUT-INT"), phi = round(c(model_st_sl$summary.hyperpar[2, 'mean'], 
+                                    model_st_sl_utime$summary.hyperpar[2, 'mean'], 
+                                    model_st_stime$summary.hyperpar[2, 'mean'],
+                                    model_st_sutime$summary.hyperpar[2, 'mean'],
+                                    model_st_sutime_int$summary.hyperpar[2, 'mean']), 3))
+row.names(phi_df) = NULL
+
+knitr::kable(phi_df, col.names = c('Model', '$\\boldsymbol\\phi$'),escape = FALSE, caption = "Posterior mean of phi per model") %>%  kable_styling(bootstrap_options = "striped",latex_options="hold_position", full_width = F, position = "left")
+
+```
+
+### WAIC
+
+```{r waic, echo = FALSE, fig.align='left'}
+dat.WAIC = data.frame(model = c("ST-LT", "ST-LUT", "ST-ST", "ST-SUT", "ST-SUT-INT"), 
+                       WAIC = round(c(model_st_sl$waic$waic, 
+                                      model_st_sl_utime$waic$waic, 
+                                      model_st_stime$waic$waic,
+                                      model_st_sutime$waic$waic,
+                                      model_st_sutime_int$waic$waic)))
+
+row.names(dat.WAIC) = NULL
+
+knitr::kable(dat.WAIC, col.names = c("Model", "WAIC"), caption = "WAIC per model") %>%  kable_styling(bootstrap_options = "striped", latex_options="hold_position", full_width = F, position = "left")
+```
+
+# References
