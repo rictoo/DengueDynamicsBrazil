@@ -93,39 +93,39 @@ upon.
 
 The observed value (i.e., observed number of dengue cases), in common with every subsequent model is the following:
 
-\[ O_{it} \sim \text{Poisson}(\rho_{it} \times \frac{pop_{it}}{10^5}) \]
+$$ O_{it} \sim \text{Poisson}(\rho_{it} \times \frac{pop_{it}}{10^5}) $$
 
 The spatio-temporal models to be fitted are specified as follows:
 
-1.  A BYM2 spatial model and a linear time trend (t being the month from the onset of study), referred to as *ST-LT*:
-\[ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \beta_tt \]
+1. A BYM2 spatial model and a linear time trend (t being the month from the onset of study), referred to as *ST-LT*:
+$$ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \beta_tt $$
 
-2.  A BYM2 spatial model, a linear time trend (t being the month from the onset of study), and an unstructured time component, referred to as *ST-LUT*:
-\[ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \beta_tt + \psi_t \]
+2. A BYM2 spatial model, a linear time trend (t being the month from the onset of study), and an unstructured time component, referred to as *ST-LUT*:
+$$ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \beta_tt + \psi_t $$
 
-3.  A BYM2 spatial model and a RW1 structured time trend, referred to as *ST-ST*:
-\[ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t \]
+3. A BYM2 spatial model and a RW1 structured time trend, referred to as *ST-ST*:
+$$ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t $$
 
-4.  A BYM2 spatial model, a RW1 structured time trend, and an unstructured time component, referred to as *ST-SUT*:
-\[ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t + \psi_t \]
+4. A BYM2 spatial model, a RW1 structured time trend, and an unstructured time component, referred to as *ST-SUT*:
+$$ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t + \psi_t $$
 
-5.  A BYM2 spatial model, a RW1 structured time trend, an unstructured time component, and a Type I space-time interaction component, referred to as *ST-SUT-INT*:
-\[ \log\rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t + \psi_t + \delta_{it} \]
+5. A BYM2 spatial model, a RW1 structured time trend, an unstructured time component, and a Type I space-time interaction component, referred to as *ST-SUT-INT*:
+$$ \log\rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t + \psi_t + \delta_{it} $$
 
 Variables above are defined as:
 
-\[ \boldsymbol{b} = \frac{1}{\sqrt{\tau_b}}(\sqrt{1-\phi}\boldsymbol{v}_{*} + \sqrt{\phi}\boldsymbol{u}_{*}) \]
-\[ \beta \sim N(0,\sigma^2_{\beta}) \]
-\[ \psi_t \sim N(0,\sigma^2_{\psi}) \]
-\[ \gamma_t \sim RW(1) \]
-\[ \delta_{it} \sim N(0,\sigma^2_{\delta}) \]
+$$ \boldsymbol{b} = \frac{1}{\sqrt{\tau_b}}(\sqrt{1-\phi}\boldsymbol{v}_{*} + \sqrt{\phi}\boldsymbol{u}_{*}) $$
+$$ \beta \sim N(0,\sigma^2_{\beta}) $$
+$$ \psi_t \sim N(0,\sigma^2_{\psi}) $$
+$$ \gamma_t \sim RW(1) $$
+$$ \delta_{it} \sim N(0,\sigma^2_{\delta}) $$
 
-The spatial random effect is modelled assuming a BYM2 specification. BYM2 combines an intrinsic CAR (ICAR) prior and a standard normal prior to allow for structured local \( u \) and unstructured global \( v \) smoothing, respectively:
+The spatial random effect is modeled assuming a BYM2 specification. BYM2 combines an intrinsic CAR (ICAR) prior and a standard normal prior to allow for structured local \( u \) and unstructured global \( v \) smoothing, respectively:
 
-\[ v_{i} \sim N(0,\sigma^2_{v}) \]
-\[ u \sim ICAR(W,\sigma^2_{u}) \]
+$$ v_{i} \sim N(0,\sigma^2_{v}) $$
+$$ u \sim ICAR(W,\sigma^2_{u}) $$
 
-The temporal random effect is modelled as a random walk of order 1 in order to allow for observations to be dependent on those immediately temporally preceding it.
+The temporal random effect is modeled as a random walk of order 1 in order to allow for observations to be dependent on those immediately temporally preceding it.
 
 Hyperprior distributions are further specified for \( \tau_b \), \( \phi \), and \( \sigma^2_{\gamma} \); these are the precision parameters controlling the marginal variance of the spatial random effect, the mixing parameter (i.e., the proportion of the marginal variance explained by the spatial effect), and the conditional variance of the temporal random effect, respectively. These hyperpriors are defined as Penalised Complexity (PC) priors, as suggested in the literature. [@moragaChapterArealData]
 
