@@ -76,12 +76,12 @@ temporal distribution of the covariates and raw incidence rates of dengue
 across Brazil (averaged across all time points) will be visualized. Second, a
 spatio-temporal analysis will be conducted of the relationship between dengue
 incidence across Brazil, geographic region, and time between the years of 2015
-- 2019. This will be accomplished by fitting five consecutive Bayesian spatio-
+\- 2019. This will be accomplished by fitting five consecutive Bayesian spatio-
 temporal models with inclusion of the three aforementioned covariates.
 
 The posterior distributions of the coefficients, spatial, and temporal
 components across each model will be inspected and the expected values
-visualised in the appropriate domain. The expected value of the ϕϕ
+visualised in the appropriate domain. The expected value of the $\phi$
 hyperparameter will be inspected and compared across models to provide an
 estimate of the degree of spatial clustering. Finally, the Watanabe-Akaike
 Information Criterion (WAIC) will be compared across the models to help
@@ -98,36 +98,46 @@ $$ O_{it} \sim \text{Poisson}(\rho_{it} \times \frac{pop_{it}}{10^5}) $$
 The spatio-temporal models to be fitted are specified as follows:
 
 1. A BYM2 spatial model and a linear time trend (t being the month from the onset of study), referred to as *ST-LT*:
+
 $$ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \beta_tt $$
 
-2. A BYM2 spatial model, a linear time trend (t being the month from the onset of study), and an unstructured time component, referred to as *ST-LUT*:
+3. A BYM2 spatial model, a linear time trend (t being the month from the onset of study), and an unstructured time component, referred to as *ST-LUT*:
+
 $$ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \beta_tt + \psi_t $$
 
-3. A BYM2 spatial model and a RW1 structured time trend, referred to as *ST-ST*:
+4. A BYM2 spatial model and a RW1 structured time trend, referred to as *ST-ST*:
+
 $$ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t $$
 
-4. A BYM2 spatial model, a RW1 structured time trend, and an unstructured time component, referred to as *ST-SUT*:
+6. A BYM2 spatial model, a RW1 structured time trend, and an unstructured time component, referred to as *ST-SUT*:
+
 $$ \log \rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t + \psi_t $$
 
-5. A BYM2 spatial model, a RW1 structured time trend, an unstructured time component, and a Type I space-time interaction component, referred to as *ST-SUT-INT*:
+8. A BYM2 spatial model, a RW1 structured time trend, an unstructured time component, and a Type I space-time interaction component, referred to as *ST-SUT-INT*:
+
 $$ \log\rho_{it} = b_0 + b_i + \mathbf{C_{it}^{T}}\boldsymbol{\beta} + \gamma_t + \psi_t + \delta_{it} $$
 
 Variables above are defined as:
 
-$$ \boldsymbol{b} = \frac{1}{\sqrt{\tau_b}}(\sqrt{1-\phi}\boldsymbol{v}_{*} + \sqrt{\phi}\boldsymbol{u}_{*}) $$
+$$ b = \frac{1}{\sqrt{\tau_b}}(\sqrt{1-\phi}v_{s} + \sqrt{\phi}u_{s}) $$
+
 $$ \beta \sim N(0,\sigma^2_{\beta}) $$
+
 $$ \psi_t \sim N(0,\sigma^2_{\psi}) $$
+
 $$ \gamma_t \sim RW(1) $$
+
 $$ \delta_{it} \sim N(0,\sigma^2_{\delta}) $$
 
 The spatial random effect is modeled assuming a BYM2 specification. BYM2 combines an intrinsic CAR (ICAR) prior and a standard normal prior to allow for structured local \( u \) and unstructured global \( v \) smoothing, respectively:
 
 $$ v_{i} \sim N(0,\sigma^2_{v}) $$
+
 $$ u \sim ICAR(W,\sigma^2_{u}) $$
 
 The temporal random effect is modeled as a random walk of order 1 in order to allow for observations to be dependent on those immediately temporally preceding it.
 
-Hyperprior distributions are further specified for \( \tau_b \), \( \phi \), and \( \sigma^2_{\gamma} \); these are the precision parameters controlling the marginal variance of the spatial random effect, the mixing parameter (i.e., the proportion of the marginal variance explained by the spatial effect), and the conditional variance of the temporal random effect, respectively. These hyperpriors are defined as Penalised Complexity (PC) priors, as suggested in the literature. [@moragaChapterArealData]
+Hyperprior distributions are further specified for $\tau_b$, $\phi$, and $\sigma^2_{\gamma}$; these are the precision parameters controlling the marginal variance of the spatial random effect, the mixing parameter (i.e., the proportion of the marginal variance explained by the spatial effect), and the conditional variance of the temporal random effect, respectively. These hyperpriors are defined as Penalised Complexity (PC) priors, as suggested in the literature (Moraga n.d.). 
 
 Analysis was performed in R (v4.2.1) and with the R-INLA software package
 (v22.12.16) (Rue 2023).
@@ -150,7 +160,7 @@ covariates are available in the Supplement.
 ### Fixed effects:
 
 After fitting the models, we can derive the posterior means and 95% credible
-intervals (CI) for the ββ coefficients across each model. The outcomes are
+intervals (CI) for the $\beta$ coefficients across each model. The outcomes are
 generally consistent across models, with the most significant discrepancy
 being the differing signs of the PDSI coefficient. Considering the _ST-SUT-
 INT_ model, the RR associated with a 1 degree increase in temperature is 1.14
@@ -184,7 +194,7 @@ found in the Supplement.
 
 ![](images/extracted_image_1.png)
 
-Furthermore, we can observe the posterior mean of the interaction effect, δδ,
+Furthermore, we can observe the posterior mean of the interaction effect, $\delta$,
 from the spatio-temporal interaction model. The results are averaged over the
 months of each year. Only the regional plots from the years 2017 and 2019 are
 displayed here for brevity’s sake: (see Supplement)
@@ -240,7 +250,7 @@ aligning with existing literature (Zambrana et al. 2018).
 
 Our analysis across all models consistently reveals spatial clustering of
 dengue incidence, as evidenced by visual inspection of spatial relative risk
-(RR) graphs and the spatial mixing hyperparameter, ϕϕ. The Goiânia
+(RR) graphs and the spatial mixing hyperparameter, $\phi$. The Goiânia
 microregion, in particular, was estimated to have a strong separable spatial
 effect. This reflects recent reports of this microregion experiencing the
 highest confirmed cases of dengue in the country in 2022 (n.d.).
@@ -329,11 +339,11 @@ Spatio-temporal interaction effect RR (averaged per year):
 
 ![](images/extracted_image_10.png)
 
-### Mixing parameter (ϕϕ)
+### Mixing parameter ($\phi$)
 
 Table of spatial mixing parameter (per BYM2) across each model:
 
-Posterior mean of phi per model  Model  |  ϕϕ  
+Posterior mean of phi per model  Model  |  $\phi$  
 ---|---  
 ST-LT  |  0.845  
 ST-LUT  |  0.961  
